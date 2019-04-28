@@ -1,0 +1,15 @@
+{
+    "name": "stee1cat/fetch-emails-from-imap",
+    "authors": [
+        {
+            "name": "Gennadiy Khatuntsev",
+            "email": "e.steelcat@gmail.com"
+        }
+    ],
+    "require": {
+        "ddeboer/imap": "^1.7",
+        "ext-imap": "*",
+        "ext-zip": "*",
+        "vlucas/phpdotenv": "^3.3"
+    }
+}

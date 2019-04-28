@@ -31,7 +31,6 @@ foreach ($mailboxes as $mailbox) {
 
             file_put_contents($filePath, $message->getRawMessage());
             $countOfSavedMessages++;
-            break;
         }
         catch (MessageDateNotExistException $e) {
             echo $e->getMessage() . PHP_EOL;

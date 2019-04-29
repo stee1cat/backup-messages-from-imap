@@ -1,15 +1,23 @@
 {
-    "name": "stee1cat/fetch-emails-from-imap",
+    "name": "stee1cat/backup-messages-from-imap",
     "authors": [
         {
             "name": "Gennadiy Khatuntsev",
             "email": "e.steelcat@gmail.com"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "stee1cat\\ImapBackupTool\\": "src/"
+        }
+    },
     "require": {
         "ddeboer/imap": "^1.7",
         "ext-imap": "*",
         "ext-zip": "*",
         "vlucas/phpdotenv": "^3.3"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.4"
     }
 }

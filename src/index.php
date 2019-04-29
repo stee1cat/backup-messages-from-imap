@@ -1,14 +1,22 @@
 <?php
 
 use Ddeboer\Imap\Exception\InvalidHeadersException;
+use function stee1cat\ImapBackupTool\compressDirectory;
+use function stee1cat\ImapBackupTool\generateFilePath;
+use function stee1cat\ImapBackupTool\loadConfig;
+use function stee1cat\ImapBackupTool\loadMailboxes;
+use function stee1cat\ImapBackupTool\makeDirectoryIfNotExists;
+use function stee1cat\ImapBackupTool\normalizeMailboxDirectory;
+use function stee1cat\ImapBackupTool\removeDirectory;
+use stee1cat\ImapBackupTool\MessageDateNotExistException;
 
-require_once './common.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'common.php';
 
 loadConfig();
 
 $mailboxes = loadMailboxes();
 $currentDate = date('Y-m-d_H-i');
-$outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . 'output';
+$outputDirectory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'output';
 $backupDirectory = $outputDirectory . DIRECTORY_SEPARATOR . $currentDate;
 $archiveName = $outputDirectory . DIRECTORY_SEPARATOR . sprintf('%s.zip', $currentDate);
 
@@ -31,18 +39,11 @@ foreach ($mailboxes as $mailbox) {
 
             file_put_contents($filePath, $message->getRawMessage());
             $countOfSavedMessages++;
-        }
-        catch (MessageDateNotExistException $e) {
+        } catch (MessageDateNotExistException | InvalidHeadersException $e) {
             echo $e->getMessage() . PHP_EOL;
 
             continue 2;
-        }
-        catch (InvalidHeadersException $e) {
-            echo $e->getMessage() . PHP_EOL;
-
-            continue 2;
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             echo $e->getMessage() . PHP_EOL;
 
             exit(1);

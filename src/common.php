@@ -1,9 +1,16 @@
 <?php
 
+namespace stee1cat\ImapBackupTool;
+
 use Ddeboer\Imap\MailboxInterface;
 use Ddeboer\Imap\MessageInterface;
 use Ddeboer\Imap\Server;
 use Dotenv\Dotenv;
+use Exception;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+use ZipArchive;
 
 const ENV_PREFIX = 'FE_';
 const REQUIRED_ENVIRONMENTS = [
@@ -14,10 +21,9 @@ const REQUIRED_ENVIRONMENTS = [
     'PASSWORD',
 ];
 
-class MessageDateNotExistException extends Exception {}
-
-function loadConfig(): void {
-    $config = Dotenv::create(__DIR__);
+function loadConfig(): void
+{
+    $config = Dotenv::create(dirname(__DIR__));
     $config->load();
 
     $config->required(array_map(function ($item) {
@@ -30,20 +36,23 @@ function loadConfig(): void {
  * @param string $varName
  * @return array|false|string
  */
-function env(string $varName) {
+function env(string $varName)
+{
     return getenv(ENV_PREFIX . $varName);
 }
 
 /**
  * @param string $outputDirectory
  */
-function makeDirectoryIfNotExists(string $outputDirectory): void {
+function makeDirectoryIfNotExists(string $outputDirectory): void
+{
     if (!is_dir($outputDirectory)) {
         mkdir($outputDirectory, 0777, true);
     }
 }
 
-function normalizeMailboxDirectory(MailboxInterface $mailbox): string {
+function normalizeMailboxDirectory(MailboxInterface $mailbox): string
+{
     $segments = explode($mailbox->getDelimiter(), $mailbox->getName());
 
     return implode(DIRECTORY_SEPARATOR, $segments);
@@ -55,7 +64,8 @@ function normalizeMailboxDirectory(MailboxInterface $mailbox): string {
  * @return string
  * @throws Exception
  */
-function generateFilePath(MessageInterface $message, string $outputDirectory): string {
+function generateFilePath(MessageInterface $message, string $outputDirectory): string
+{
     $filenameFormat = '%s_%d.msg';
     $messageIdx = 1;
 
@@ -83,7 +93,8 @@ function generateFilePath(MessageInterface $message, string $outputDirectory): s
 /**
  * @return MailboxInterface[]
  */
-function loadMailboxes(): array {
+function loadMailboxes(): array
+{
     $server = new Server(env('HOSTNAME'), env('PORT'), env('FLAGS'));
     $connection = $server->authenticate(env('USERNAME'), env('PASSWORD'));
 
@@ -94,13 +105,18 @@ function loadMailboxes(): array {
  * @param string $path
  * @param string $archive
  */
-function compressDirectory(string $path, string $archive): void {
+function compressDirectory(string $path, string $archive): void
+{
     $rootPath = realpath($path);
     $zip = new ZipArchive();
     $zip->open($archive, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
     /** @var SplFileInfo[] $files */
-    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($rootPath), RecursiveIteratorIterator::LEAVES_ONLY);
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($rootPath),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+
     foreach ($files as $name => $file) {
         if (!$file->isDir()) {
             $filePath = $file->getRealPath();
@@ -118,7 +134,8 @@ function compressDirectory(string $path, string $archive): void {
 /**
  * @param string $src
  */
-function removeDirectory(string $src): void {
+function removeDirectory(string $src): void
+{
     $directory = opendir($src);
 
     while (false !== ($file = readdir($directory))) {
@@ -127,8 +144,7 @@ function removeDirectory(string $src): void {
 
             if (is_dir($full)) {
                 removeDirectory($full);
-            }
-            else {
+            } else {
                 unlink($full);
             }
         }
